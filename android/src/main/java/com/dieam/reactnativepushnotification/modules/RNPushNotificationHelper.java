@@ -182,6 +182,9 @@ public class RNPushNotificationHelper {
             }
 
             int priority = NotificationCompat.PRIORITY_HIGH;
+            if (Build.VERSION.SDK_INT >= 16) {
+                priority = NotificationManager.IMPORTANCE_HIGH;
+            }
             final String priorityString = bundle.getString("priority");
 
             if (priorityString != null) {
@@ -206,38 +209,7 @@ public class RNPushNotificationHelper {
                 }
             }
 
-            int importance = NotificationManager.IMPORTANCE_HIGH;
-            final String importanceString = bundle.getString("importance");	
-
-            if (importanceString != null) {	
-                switch(importanceString.toLowerCase()) {	
-                    case "default":	
-                        importance = NotificationManager.IMPORTANCE_DEFAULT;	
-                        break;	
-                    case "max":	
-                        importance = NotificationManager.IMPORTANCE_MAX;	
-                        break;	
-                    case "high":	
-                        importance = NotificationManager.IMPORTANCE_HIGH;	
-                        break;	
-                    case "low":	
-                        importance = NotificationManager.IMPORTANCE_LOW;	
-                        break;	
-                    case "min":	
-                        importance = NotificationManager.IMPORTANCE_MIN;	
-                        break;	
-                    case "none":	
-                        importance = NotificationManager.IMPORTANCE_NONE;	
-                        break;	
-                    case "unspecified":	
-                        importance = NotificationManager.IMPORTANCE_UNSPECIFIED;	
-                        break;	
-                    default:	
-                        importance = NotificationManager.IMPORTANCE_HIGH;	
-                }	
-            }	
-
-            channel_id = channel_id + "-" + importance;
+            channel_id = channel_id + "-" + priority;
 
             int visibility = NotificationCompat.VISIBILITY_PRIVATE;
             final String visibilityString = bundle.getString("visibility");
@@ -410,7 +382,7 @@ public class RNPushNotificationHelper {
                 notification.setVibrate(vibratePattern);
             }
 
-            checkOrCreateChannel(notificationManager, channel_id, soundUri, importance, vibratePattern);
+            checkOrCreateChannel(notificationManager, channel_id, soundUri, priority, vibratePattern);
 
             notification.setChannelId(channel_id);
             notification.setContentIntent(pendingIntent);
@@ -668,11 +640,15 @@ public class RNPushNotificationHelper {
     public void checkOrCreateDefaultChannel() {
       NotificationManager manager = notificationManager();
 
-      int importance = NotificationManager.IMPORTANCE_HIGH;
+      int importance = NotificationCompat.PRIORITY_HIGH;
 
-      String channel_id = NOTIFICATION_CHANNEL_ID + "-" + importance + "-" + DEFAULT_VIBRATION;
+      if (Build.VERSION.SDK_INT >= 16) {
+          importance = NotificationManager.IMPORTANCE_HIGH;
+      }
 
-      checkOrCreateChannel(manager, channel_id, null, importance, new long[] {0, DEFAULT_VIBRATION});
+      String channel_id = NOTIFICATION_CHANNEL_ID + "-" + importance;
+
+      checkOrCreateChannel(manager, channel_id, null, importance, new long[] {0});
     }
 
     private void checkOrCreateChannel(NotificationManager manager, String channel_id, Uri soundUri, int importance, long[] vibratePattern) {
